@@ -1,0 +1,4 @@
+(executable
+ (public_name ocaml-forensics)
+ (name main)
+ (libraries forensics hex))

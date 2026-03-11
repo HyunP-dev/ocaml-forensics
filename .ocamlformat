@@ -1,0 +1,4 @@
+profile=janestreet
+margin=80
+break-infix=fit-or-vertical
+break-infix-before-func=true

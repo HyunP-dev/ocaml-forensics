@@ -1,0 +1,8 @@
+(library
+ (name forensics)
+ (foreign_stubs
+  (language c)
+  (names libewf_stubs libtsk_stubs)
+  (flags
+   (:standard -I %{ocaml_where})))
+ (c_library_flags (-lewf -ltsk)))

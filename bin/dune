@@ -1,4 +1,6 @@
 (executable
  (public_name ocaml-forensics)
  (name main)
- (libraries forensics hex))
+ (libraries core forensics hex)
+ (preprocess
+  (pps ppx_jane)))

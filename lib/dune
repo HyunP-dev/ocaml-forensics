@@ -4,5 +4,12 @@
   (language c)
   (names libewf_stubs libtsk_stubs)
   (flags
-   (:standard -I %{ocaml_where})))
- (c_library_flags (-lewf -ltsk)))
+   (:standard 
+    -I %{ocaml_where} 
+    -I/opt/homebrew/include 
+    -I/usr/local/include)))
+ (c_library_flags (
+  -L/opt/homebrew/lib 
+  -L/usr/local/lib 
+  -lewf 
+  -ltsk)))

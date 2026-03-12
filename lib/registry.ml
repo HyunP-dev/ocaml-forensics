@@ -2,6 +2,7 @@ open Core
 
 type libregf_file_t
 type libregf_key_t
+type libregf_value_t
 
 external libregf_file_initialize
   :  unit
@@ -34,3 +35,15 @@ external get_subkey_names
   :  libregf_key_t
   -> (string array, string) result
   = "caml_get_subkey_names"
+
+external get_values
+  :  libregf_key_t
+  -> (libregf_value_t array, string) result
+  = "caml_get_values"
+
+module Value = struct
+  external get_name
+    :  libregf_value_t
+    -> (string, string) result
+    = "caml_get_name_from_value"
+end

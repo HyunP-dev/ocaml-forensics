@@ -179,7 +179,7 @@ CAMLprim value caml_get_value_names(value v_key) {
     }
 
     {
-        v_value_names = CAML_alloc(number_of_values, 0);
+        v_value_names = caml_alloc(number_of_values, 0);
         for (int i=0; i<number_of_values; i++) {
             libregf_value_t* value = NULL;
             if (libregf_key_get_value_by_index(key, i, &value, &error) != 1) {

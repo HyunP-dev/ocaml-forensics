@@ -21,7 +21,7 @@ CAMLprim value caml_libregf_file_initialize()
         libregf_error_sprint(error, message, BUFSIZ);
 
         v_result = caml_alloc(1, 1);
-        Store_field(v_result, 0, String_val(message));
+        Store_field(v_result, 0, caml_copy_string(message));
         CAMLreturn(v_result);
     }
 
@@ -38,17 +38,78 @@ CAMLprim value caml_libregf_file_open(value v_handle, value v_path)
     libregf_file_t *file = (libregf_file_t *)Nativeint_val(v_handle);
     libregf_error_t *error = NULL;
 
-    if (libregf_file_open(file, String_val(v_path), LIBREGF_ACCESS_FLAG_READ, error) != 1)
+    if (libregf_file_open(file, String_val(v_path), LIBREGF_ACCESS_FLAG_READ, &error) != 1)
     {
         char message[BUFSIZ];
         libregf_error_sprint(error, message, BUFSIZ);
 
         v_result = caml_alloc(1, 1);
-        Store_field(v_result, 0, String_val(message));
+        Store_field(v_result, 0, caml_copy_string(message));
         CAMLreturn(v_result);
     }
 
     v_result = caml_alloc(1, 0);
     Store_field(v_result, 0, caml_copy_nativeint((intnat)file));
+    CAMLreturn(v_result);
+}
+
+CAMLprim value caml_libregf_file_get_key_by_utf8_path(value v_handle, value v_path)
+{
+    CAMLparam2(v_handle, v_path);
+    CAMLlocal1(v_result);
+
+    libregf_file_t *file = (libregf_file_t *)Nativeint_val(v_handle);
+    libregf_key_t *key = NULL;
+    libregf_error_t *error = NULL;
+
+    const char *path = String_val(v_path);
+    if (libregf_file_get_key_by_utf8_path(file, (const uint8_t *) path, strlen(path), &key, &error) != 1)
+    {
+        char message[BUFSIZ];
+        libregf_error_sprint(error, message, BUFSIZ);
+        
+        v_result = caml_alloc(1, 1);
+        Store_field(v_result, 0, caml_copy_string(message));
+        CAMLreturn(v_result);
+    }
+
+    v_result = caml_alloc(1, 0);
+    Store_field(v_result, 0, caml_copy_nativeint((intnat)key));
+    CAMLreturn(v_result);
+}
+
+CAMLprim value caml_libregf_key_get_utf8_name(value v_key)
+{
+    CAMLparam1(v_key);
+    CAMLlocal1(v_result);
+
+    libregf_key_t *key = (libregf_key_t *)Nativeint_val(v_key);
+    libregf_error_t *error = NULL;
+
+    size_t name_size = -1;
+    if (libregf_key_get_utf8_name_size(key, &name_size, &error) != 1)
+    {
+        goto error;
+    }
+
+    uint8_t *key_name = malloc(name_size);
+    if (libregf_key_get_utf8_name(key, key_name, name_size, &error) != 1)
+    {
+        goto error;
+    }
+
+    goto ok;
+
+error:
+    char message[BUFSIZ];
+    libregf_error_sprint(error, message, BUFSIZ);
+
+    v_result = caml_alloc(1, 1);
+    Store_field(v_result, 0, caml_copy_string((const char *)message));
+    CAMLreturn(v_result);
+
+ok:
+    v_result = caml_alloc(1, 0);
+    Store_field(v_result, 0, caml_copy_string((const char *)key_name));
     CAMLreturn(v_result);
 }

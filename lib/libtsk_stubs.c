@@ -84,7 +84,9 @@ CAMLprim value caml_tsk_fs_file_read(value v_offset, value v_size, value v_file)
 
     TSK_FS_FILE *file = (TSK_FS_FILE *)Nativeint_val(v_file);
     TSK_OFF_T offset = Int64_val(v_offset);
-    size_t size = MIN(Int64_val(v_size), file->meta->size);
+    int64_t a_size = Int64_val(v_size);
+
+    size_t size = a_size >= 0 ? MIN(a_size, file->meta->size) : file->meta->size;
     uint8_t *buffer = malloc(size);
 
     tsk_fs_file_read(file, offset, buffer, size, TSK_FS_FILE_READ_FLAG_NONE);

@@ -29,3 +29,8 @@ let open_file path =
   let%bind.Result handle = libregf_file_initialize () in
   libregf_file_open handle path
 ;;
+
+external get_subkey_names
+  :  libregf_key_t
+  -> (string array, string) result
+  = "caml_get_subkey_names"

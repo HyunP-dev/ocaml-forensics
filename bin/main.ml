@@ -22,18 +22,22 @@ module RegistryAnalysis = struct
     in
     let%bind.Result name = Registry.libregf_key_get_utf8_name key in
     let%bind.Result subkey_names = Registry.get_subkey_names key in
-    (* Array.iter subkey_names ~f:print_endline; *)
-    let%bind.Result values = Registry.get_values key in
-    values
-    |> Array.map ~f:Registry.Value.get_name
-    |> Array.iter ~f:(fun name -> ignore (Result.map name ~f:print_endline));
+    key
+    |> Registry.get_value_names
+    |> Result.iter
+         ~f:
+           (Array.iter ~f:(fun name ->
+              print_endline name;
+              Registry.get_value_by_name key ~name
+              |> Result.iter ~f:(fun raw -> Hex.hexdump (Hex.of_bytes raw))))
+    |> ignore;
     Ok ()
   ;;
 end
 
 let () =
   analyse
-    (image "/Users/rpark/Downloads/Hunter XP.E01")
+    (image "/mnt/d/Personal/Hunter XP.E01")
     (FileSystem { start = 63L })
     (Filename "/Windows/System32/Config/SOFTWARE")
     (RegistryAnalysis.show "\\Microsoft\\Windows NT\\CurrentVersion")

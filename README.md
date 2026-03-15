@@ -24,7 +24,7 @@ let main () =
   in
   partitions
   |> Array.map ~f:Tsk.sexp_of_partition
-  |> Array.map ~f:Sexp.to_string
+  |> Array.map ~f:Sexp.to_string_hum
   |> Array.iter ~f:print_endline
 ;;
 

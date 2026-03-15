@@ -1,3 +1,5 @@
+open Core
+
 type tsk_img_info
 type tsk_fs_info
 type tsk_fs_file
@@ -25,3 +27,16 @@ external fs_file_read
   -> tsk_fs_file
   -> bytes
   = "caml_tsk_fs_file_read"
+
+type partition =
+  { index : int64
+  ; start : int64
+  ; length : int64
+  ; description : string
+  }
+[@@deriving sexp]
+
+external get_partitions
+  :  tsk_img_info
+  -> (partition array, string) result
+  = "caml_get_partitions"

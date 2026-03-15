@@ -19,12 +19,8 @@ module RegistryAnalysis = struct
       ~binary:true
       ~append:false
       ~f:(fun oc -> Out_channel.output_bytes oc raw);
-      
     let%bind.Result registry = Registry.File.open_file "TEMP_REG.raw" in
     let%bind.Result key = Registry.File.get_key_by_utf8_path registry path in
-    let%bind.Result name = Registry.Key.get_utf8_name key in
-    let%bind.Result subkey_names = Registry.Key.get_subkey_names key in
-    
     key
     |> Registry.Key.get_value_names
     |> Result.iter
@@ -33,9 +29,7 @@ module RegistryAnalysis = struct
               Registry.Key.get_value_by_name key ~name
               |> Result.iter ~f:(fun (value_type, raw) ->
                 print_endline
-                  (name
-                   ^ ": "
-                   ^ Registry.ValueType.to_string value_type);
+                  (name ^ ": " ^ Registry.ValueType.to_string value_type);
                 (match value_type with
                  | String -> print_endline (Bytes.to_string raw)
                  | Int32LE ->
@@ -53,11 +47,22 @@ module RegistryAnalysis = struct
   ;;
 end
 
-let () =
-  analyse
-    (image "/Users/rpark/Downloads/Hunter XP.E01")
-    (FileSystem { start = 63L })
-    (Filename "/Windows/System32/Config/SOFTWARE")
-    (RegistryAnalysis.show "\\Microsoft\\Windows NT\\CurrentVersion")
-  |> ignore
+let main () =
+  let path = "/Users/rpark/Downloads/Hunter XP.E01" in
+  let image_handle =
+    match Tsk.img_open path with
+    | Ok r -> r
+    | Error msg -> failwith msg
+  in
+  let partitions =
+    match Tsk.get_partitions image_handle with
+    | Ok r -> r
+    | Error msg -> failwith msg
+  in
+  partitions
+  |> Array.map ~f:Tsk.sexp_of_partition
+  |> Array.map ~f:Sexp.to_string
+  |> Array.iter ~f:print_endline
 ;;
+
+main ()

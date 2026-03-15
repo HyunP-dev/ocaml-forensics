@@ -13,7 +13,7 @@ CAMLprim value caml_tsk_img_open(value v_path)
     CAMLparam1(v_path);
     CAMLlocal1(v_result);
 
-    char *path = String_val(v_path);
+    const char *path = String_val(v_path);
     const char *images[] = {path};
 
     TSK_IMG_INFO *img = tsk_img_open(1, (const TSK_TCHAR **)images, TSK_IMG_TYPE_DETECT, 0);
@@ -42,7 +42,7 @@ CAMLprim value caml_tsk_fs_open_img(value v_tsk_img_info, value v_offset)
     fs = tsk_fs_open_img(img, offset * img->sector_size, TSK_FS_TYPE_DETECT);
     if (fs == NULL)
     {
-        char *message = tsk_error_get();
+        const char *message = tsk_error_get();
         img->close(img);
 
         v_result = caml_alloc(1, 1);
@@ -61,12 +61,12 @@ CAMLprim value caml_tsk_fs_file_open(value v_fs, value v_path)
     CAMLlocal1(v_result);
 
     TSK_FS_INFO *fs = (TSK_FS_INFO *)Nativeint_val(v_fs);
-    char *path = String_val(v_path);
+    const char *path = String_val(v_path);
 
     TSK_FS_FILE *file = tsk_fs_file_open(fs, NULL, path);
     if (file == NULL)
     {
-        char *message = tsk_error_get();
+        const char *message = tsk_error_get();
         v_result = caml_alloc(1, 1);
         Store_field(v_result, 0, caml_copy_string(message));
         CAMLreturn(v_result);
@@ -89,34 +89,45 @@ CAMLprim value caml_tsk_fs_file_read(value v_offset, value v_size, value v_file)
     size_t size = a_size >= 0 ? MIN(a_size, file->meta->size) : file->meta->size;
     uint8_t *buffer = malloc(size);
 
-    tsk_fs_file_read(file, offset, buffer, size, TSK_FS_FILE_READ_FLAG_NONE);
+    tsk_fs_file_read(file, offset, (char*)buffer, size, TSK_FS_FILE_READ_FLAG_NONE);
     v_raw = caml_alloc_string(size);
     memcpy((void *)Bytes_val(v_raw), (const void *)buffer, size);
     CAMLreturn(v_raw);
 }
 
-CAMLprim value caml_tsk_vs_open(value v_tsk_img_info)
+CAMLprim value caml_get_partitions(value v_tsk_img_info)
 {
     CAMLparam1(v_tsk_img_info);
-    CAMLlocal1(v_result);
+    CAMLlocal3(v_result, v_parts, v_part);
 
     TSK_IMG_INFO *img_info = (TSK_IMG_INFO *)Nativeint_val(v_tsk_img_info);
     TSK_VS_INFO *vs_info = tsk_vs_open(img_info, 0, TSK_VS_TYPE_DETECT);
+    if (vs_info == NULL) goto error;
 
+    v_parts = caml_alloc(vs_info->part_count, 0);
     for (int i = 0; i < vs_info->part_count; i++)
     {
-        TSK_VS_PART_INFO *part = tsk_vs_part_get(vs_info, i);
-
+        const TSK_VS_PART_INFO *part = tsk_vs_part_get(vs_info, i);
+        
         if (part == NULL)
             break;
-        printf("%-5d | %-12llu | %-8llu | %s\n",
-               part->addr,
-               part->start,
-               part->len,
-               part->desc);
+
+        v_part = caml_alloc(4, 0);
+        Store_field(v_part, 0, caml_copy_int64(part->addr));
+        Store_field(v_part, 1, caml_copy_int64(part->start));
+        Store_field(v_part, 2, caml_copy_int64(part->len));
+        Store_field(v_part, 3, caml_copy_string(part->desc));
+
+        Store_field(v_parts, i, v_part);
     }
 
     tsk_vs_close(vs_info);
-    
-    // TODO: export partition info.
+    v_result = caml_alloc(1, 0);
+    Store_field(v_result, 0, v_parts);
+    CAMLreturn(v_result);
+
+error:
+    v_result = caml_alloc(1, 1);
+    Store_field(v_result, 0, caml_copy_string(tsk_error_get()));
+    CAMLreturn(v_result);
 }

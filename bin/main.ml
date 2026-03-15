@@ -2,6 +2,7 @@ open Core
 open Forensics
 open Hex
 
+
 module CommonAnalysis = struct
   let xxd file =
     file
@@ -14,7 +15,7 @@ end
 module RegistryAnalysis = struct
   let show path file =
     let raw = Tsk.fs_file_read ~offset:0L ~size:(-1L) file in
-    Out_channel.with_file "TEMP_REG.raw" ~binary:true ~f:(fun oc ->
+    Out_channel.with_file "TEMP_REG.raw" ~binary:true ~append:false ~f:(fun oc ->
       Out_channel.output_bytes oc raw);
     let%bind.Result registry = Registry.open_file "TEMP_REG.raw" in
     let%bind.Result key =
@@ -37,7 +38,7 @@ end
 
 let () =
   analyse
-    (image "/mnt/d/Personal/Hunter XP.E01")
+    (image "/Users/rpark/Downloads/Hunter XP.E01")
     (FileSystem { start = 63L })
     (Filename "/Windows/System32/Config/SOFTWARE")
     (RegistryAnalysis.show "\\Microsoft\\Windows NT\\CurrentVersion")

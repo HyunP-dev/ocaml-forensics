@@ -1,6 +1,7 @@
 module Tsk = Tsk
 module Ewf = Ewf
 module Registry = Registry
+module Filesystem = Filesystem
 
 let image path =
   let image_handle_result = Tsk.img_open path in

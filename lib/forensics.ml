@@ -15,7 +15,7 @@ type analysis_argument =
   | FileSystem of { start : int64 }
   | Filename of string
 
-let analyse image fs (path : analysis_argument) f =
+let analyse image fs path f =
   match fs with
   | FileSystem { start } ->
     let fs_info_result = Tsk.fs_open_img image ~offset:start in

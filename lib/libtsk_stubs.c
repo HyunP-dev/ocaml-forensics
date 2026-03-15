@@ -94,3 +94,29 @@ CAMLprim value caml_tsk_fs_file_read(value v_offset, value v_size, value v_file)
     memcpy((void *)Bytes_val(v_raw), (const void *)buffer, size);
     CAMLreturn(v_raw);
 }
+
+CAMLprim value caml_tsk_vs_open(value v_tsk_img_info)
+{
+    CAMLparam1(v_tsk_img_info);
+    CAMLlocal1(v_result);
+
+    TSK_IMG_INFO *img_info = (TSK_IMG_INFO *)Nativeint_val(v_tsk_img_info);
+    TSK_VS_INFO *vs_info = tsk_vs_open(img_info, 0, TSK_VS_TYPE_DETECT);
+
+    for (int i = 0; i < vs_info->part_count; i++)
+    {
+        TSK_VS_PART_INFO *part = tsk_vs_part_get(vs_info, i);
+
+        if (part == NULL)
+            break;
+        printf("%-5d | %-12llu | %-8llu | %s\n",
+               part->addr,
+               part->start,
+               part->len,
+               part->desc);
+    }
+
+    tsk_vs_close(vs_info);
+    
+    // TODO: export partition info.
+}

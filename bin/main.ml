@@ -52,7 +52,7 @@ let main () =
   let open Result.Let_syntax in
 
   (* Read partitions from a image. *)
-  let path = "/Users/rpark/Downloads/Hunter XP.E01" in
+  let path = "/mnt/d/Personal/Hunter XP.E01" in
   let%bind image_handle = Tsk.img_open path in
   let%bind partitions = Tsk.get_partitions image_handle in
   partitions
@@ -67,16 +67,21 @@ let main () =
   let temp_filename = Filename_unix.temp_file "ocaml.forensics.hive" ".tmp" in
   Out_channel.with_file temp_filename ~binary:true ~f:(fun oc ->
     Out_channel.output_bytes oc raw);
-    
+
   (* Get product name from the hive file. *)
   let%bind registry = Registry.File.open_file temp_filename in
   let key_path = "\\Microsoft\\Windows NT\\CurrentVersion" in
   let%bind key = Registry.File.get_key_by_utf8_path registry key_path in
-  let%bind value_type, value_raw = Registry.Key.get_value_by_name key ~name:"ProductName" in
+  let%bind value_type, value_raw =
+    Registry.Key.get_value_by_name key ~name:"ProductName"
+  in
   print_endline (Bytes.to_string value_raw);
-
   Core_unix.unlink temp_filename;
   Ok ()
 ;;
 
-main ()
+let () =
+  match main () with
+  | Ok _ -> ()
+  | Error msg -> prerr_endline msg
+;;

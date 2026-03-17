@@ -1,8 +1,10 @@
 open Core
+open Core_unix
 
 type tsk_img_info
 type tsk_fs_info
 type tsk_fs_file
+type tsk_fs_dir
 
 external img_open
   :  string
@@ -40,3 +42,17 @@ external get_partitions
   :  tsk_img_info
   -> (partition array, string) result
   = "caml_get_partitions"
+
+module File = struct
+  type t = tsk_fs_file
+
+  external get_name
+    :  tsk_fs_file
+    -> (string, string) result
+    = "caml_get_filename"
+
+  external get_children
+    :  tsk_fs_file
+    -> (tsk_fs_file array, string) result
+    = "caml_get_sub_entries"
+end

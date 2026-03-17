@@ -66,7 +66,8 @@ CAMLprim value caml_libregf_file_get_key_by_utf8_path(value v_handle, value v_pa
     if (libregf_file_get_key_by_utf8_path(file, (const uint8_t *)path, strlen(path), &key, &error) != 1)
     {
         char message[BUFSIZ];
-        libregf_error_sprint(error, message, BUFSIZ);
+        // libregf_error_sprint(error, message, BUFSIZ);
+        sprintf(message, "%s: unable to retrieve key.", "libregf_file_get_key_by_utf8_path");
 
         v_result = caml_alloc(1, 1);
         Store_field(v_result, 0, caml_copy_string(message));

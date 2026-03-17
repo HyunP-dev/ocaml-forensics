@@ -12,6 +12,9 @@ bug-reports: "https://github.com/HyunP-dev/ocaml-forensics/issues"
 depends: [
   "dune" {>= "3.21"}
   "ocaml"
+  "core"
+  "core_unix"
+  "hex"
   "odoc" {with-doc}
 ]
 build: [

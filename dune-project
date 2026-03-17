@@ -19,7 +19,7 @@
  (name ocaml-forensics)
  (synopsis "Digital forensics library for OCaml")
  (description "Library for easy writing of digital forensic analysis scripts")
- (depends ocaml)
+ (depends ocaml core core_unix hex)
  (tags
   ("Digital Forensics")))
 

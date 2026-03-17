@@ -1,0 +1,12 @@
+(executables
+ (names get_windows_version iterate_root_files)
+ (public_names get_windows_version iterate_root_files)
+ (libraries
+  core
+  core_unix
+  core_unix.sys_unix
+  core_unix.filename_unix
+  forensics
+  hex)
+ (preprocess
+  (pps ppx_jane)))
